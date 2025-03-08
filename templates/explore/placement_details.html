@@ -1,0 +1,42 @@
+<!-- templates/explore/internship_details.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ college.name }} Internship Data - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ college.name }} Internship Data</h1>
+    <div>
+        <a href="{{ url_for('explore_internship') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Back to Internship Data
+        </a>
+        <a href="{{ url_for('college_details', college_id=college._id) }}" class="btn btn-primary">
+            <i class="bi bi-building"></i> View College
+        </a>
+    </div>
+</div>
+
+{% if internship_data is sequence and internship_data|length > 1 %}
+<ul class="nav nav-tabs mb-4" id="yearTabs" role="tablist">
+    {% for internship in internship_data %}
+    <li class="nav-item" role="presentation">
+        <button class="nav-link {% if loop.first %}active{% endif %}" id="year{{ loop.index }}-tab" data-bs-toggle="tab" data-bs-target="#year{{ loop.index }}" type="button" role="tab">
+            {{ internship.academic_year }}
+        </button>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content" id="yearTabsContent">
+    {% for internship in internship_data %}
+    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="year{{ loop.index }}" role="tabpanel">
+        {% include 'explore/internship_year_data.html' with context %}
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+{% with internship = internship_data %}
+    {% include 'explore/internship_year_data.html' with context %}
+{% endwith %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,216 @@
+/* static/css/styles.css */
+
+/* Global styles */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card shadows */
+.card {
+    border: none;
+}
+
+.shadow-sm {
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Card hover effect */
+.card.stat-card {
+    transition: all 0.3s ease;
+}
+
+.card.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Table styles */
+.table-responsive {
+    overflow-x: auto;
+}
+
+/* Badge styles */
+.badge {
+    font-weight: 500;
+}
+
+/* Navbar active state */
+.navbar-dark .navbar-nav .nav-link.active {
+    font-weight: 500;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 0.25rem;
+}
+
+/* Form styles */
+.form-label {
+    font-weight: 500;
+}
+
+/* Page header styles */
+h1 {
+    color: #333;
+    font-weight: 600;
+}
+
+/* Code block styles */
+pre {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.25rem;
+    overflow-x: auto;
+}
+
+/* Utility classes */
+.text-truncate-container {
+    max-width: 300px;
+}
+
+.text-justify {
+    text-align: justify;
+}
+
+/* Progress bar styles */
+.progress {
+    height: 0.75rem;
+    border-radius: 0.25rem;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+/* Dashboard widgets */
+.stat-card h2 {
+    font-size: 2.5rem;
+    font-weight: 600;
+    margin-bottom: 0;
+}
+
+.stat-card h5 {
+    font-weight: 500;
+}
+
+/* Empty state styles */
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+/* Card-header with tabs */
+.card-header-tabs {
+    margin-right: -1rem;
+    margin-bottom: -0.75rem;
+    margin-left: -1rem;
+    border-bottom: 0;
+}
+
+/* Table row hover effect */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* Error message styling */
+.validation-error {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
+
+/* Login and registration pages */
+.auth-card {
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+/* Tooltip styling */
+.tooltip-inner {
+    max-width: 300px;
+}
+
+/* Badge positioning */
+.badge-corner {
+    position: absolute;
+    top: -0.5rem;
+    right: -0.5rem;
+}
+
+/* Content transition effects */
+.fade-enter {
+    opacity: 0;
+}
+
+.fade-enter-active {
+    opacity: 1;
+    transition: opacity 300ms;
+}
+
+.fade-exit {
+    opacity: 1;
+}
+
+.fade-exit-active {
+    opacity: 0;
+    transition: opacity 300ms;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .stat-card h2 {
+        font-size: 1.75rem;
+    }
+    
+    .card-title {
+        font-size: 1.25rem;
+    }
+    
+    .table th, .table td {
+        padding: 0.5rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #dee2e6 !important;
+    }
+    
+    body {
+        font-size: 11pt;
+    }
+    
+    .container {
+        max-width: 100%;
+    }
+}

@@ -1,0 +1,20 @@
+<!-- templates/errors/403.html -->
+{% extends "base.html" %}
+
+{% block title %}Access Denied - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm text-center p-5 mt-5">
+            <h1 class="display-1 text-muted">403</h1>
+            <h2 class="mb-4">Access Denied</h2>
+            <p class="mb-4">You don't have permission to access this page. Please contact an administrator if you believe this is an error.</p>
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Dashboard</a>
+                <button onclick="history.back()" class="btn btn-outline-secondary ms-2">Go Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

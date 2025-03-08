@@ -1,0 +1,282 @@
+<!-- templates/dashboard/index.html -->
+{% extends "base.html" %}
+
+{% block title %}Dashboard - College Data Crawler{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stat-card {
+        transition: transform 0.3s;
+    }
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Dashboard</h1>
+
+<div class="row">
+    <div class="col-md-3 mb-4">
+        <div class="card stat-card h-100 border-primary">
+            <div class="card-body text-center">
+                <h5 class="card-title">Colleges</h5>
+                <h2 class="display-4">{{ stats.colleges.total_colleges }}</h2>
+                <div class="mt-3 small text-muted">
+                    {{ stats.colleges.engineering_colleges }} Engineering<br>
+                    {{ stats.colleges.medical_colleges }} Medical
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stat-card h-100 border-success">
+            <div class="card-body text-center">
+                <h5 class="card-title">Raw Content</h5>
+                <h2 class="display-4">{{ stats.content.total_content }}</h2>
+                <div class="mt-3 small text-muted">
+                    {{ stats.content.processed_content }} Processed<br>
+                    {{ stats.content.unprocessed_content }} Unprocessed
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stat-card h-100 border-info">
+            <div class="card-body text-center">
+                <h5 class="card-title">Admission Data</h5>
+                <h2 class="display-4">{{ stats.admission.total_colleges }}</h2>
+                <div class="mt-3 small text-muted">
+                    {{ stats.admission.avg_courses_per_college|round(1) }} Avg. Courses<br>
+                    {{ stats.admission.colleges_with_hostel }} With Hostel Info
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-4">
+        <div class="card stat-card h-100 border-warning">
+            <div class="card-body text-center">
+                <h5 class="card-title">Placement Data</h5>
+                <h2 class="display-4">{{ stats.placement.recent_years|length }}</h2>
+                <div class="mt-3 small text-muted">
+                    Years with data
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Crawler Status</h5>
+                <span class="badge bg-info">{{ crawler_status.active_jobs }} Active Jobs</span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>Queue Size: <span class="fw-bold">{{ crawler_status.queue_size }}</span></div>
+                    <div>Worker Threads: <span class="fw-bold">{{ crawler_status.worker_count }}</span></div>
+                </div>
+                {% if crawler_status.active_job_details %}
+                <h6>Active Jobs:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Job ID</th>
+                                <th>Worker</th>
+                                <th>Running Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in crawler_status.active_job_details %}
+                            <tr>
+                                <td><a href="{{ url_for('crawl_job_details', job_id=job.job_id) }}">{{ job.job_id|truncate(10, true) }}</a></td>
+                                <td>Worker {{ job.worker_id }}</td>
+                                <td>{{ job.running_time }} min</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No active crawl jobs</div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('crawl_jobs') }}" class="btn btn-sm btn-primary">View All Crawl Jobs</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">AI Processing Status</h5>
+                <span class="badge {% if ai_status.model_loaded %}bg-success{% else %}bg-danger{% endif %}">
+                    Model {% if ai_status.model_loaded %}Loaded{% else %}Not Loaded{% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between mb-3">
+                    <div>Queue Size: <span class="fw-bold">{{ ai_status.queue_size }}</span></div>
+                    <div>Worker Threads: <span class="fw-bold">{{ ai_status.worker_count }}</span></div>
+                </div>
+                {% if ai_status.active_job_details %}
+                <h6>Active Jobs:</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Job ID</th>
+                                <th>Worker</th>
+                                <th>Running Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in ai_status.active_job_details %}
+                            <tr>
+                                <td>{{ job.job_id|truncate(10, true) }}</td>
+                                <td>Worker {{ job.worker_id }}</td>
+                                <td>{{ job.running_time }} min</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No active AI jobs</div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('ai_status') }}" class="btn btn-sm btn-primary">View AI Status</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-2">
+    <div class="col-md-12">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Crawl Jobs</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_jobs %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Job ID</th>
+                                <th>College</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Duration</th>
+                                <th>Pages Crawled</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for job in recent_jobs %}
+                            <tr>
+                                <td><a href="{{ url_for('crawl_job_details', job_id=job._id) }}">{{ job._id|truncate(10, true) }}</a></td>
+                                <td>{{ job.college_id }}</td>
+                                <td>
+                                    <span class="badge bg-{% if job.status == 'completed' %}success{% elif job.status == 'running' %}primary{% elif job.status == 'queued' %}warning{% else %}danger{% endif %}">
+                                        {{ job.status }}
+                                    </span>
+                                </td>
+                                <td>{{ job.timestamps.started|format_date if job.timestamps.started else 'Not started' }}</td>
+                                <td>{{ job.duration_seconds|format_duration if job.duration_seconds else '-' }}</td>
+                                <td>{{ job.pages_crawled }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No recent crawl jobs</div>
+                {% endif %}
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('crawl_jobs') }}" class="btn btn-sm btn-primary">View All Jobs</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Content Distribution</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="contentChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">States Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 250px; overflow-y: auto;">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>State</th>
+                                <th class="text-end">Colleges</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for state in stats.states %}
+                            <tr>
+                                <td>{{ state }}</td>
+                                <td class="text-end">
+                                    <a href="{{ url_for('colleges', state=state) }}">View</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chart.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+<script>
+    // Content Distribution Chart
+    /* eslint-disable */
+    new Chart(document.getElementById('contentChart'), {
+        type: 'pie',
+        data: {
+            labels: ['Admission', 'Placement', 'Internship', 'Other'],
+            datasets: [{
+                data: [
+                    {{ stats.content.admission_content }},
+                    {{ stats.content.placement_content }},
+                    {{ stats.content.internship_content }},
+                    {{ stats.content.total_content - stats.content.admission_content - stats.content.placement_content - stats.content.internship_content }}
+                ],
+                backgroundColor: ['#36a2eb', '#ff6384', '#ffcd56', '#4bc0c0'],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,84 @@
+<!-- templates/colleges/add.html -->
+{% extends "base.html" %}
+
+{% block title %}Add College - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Add College</h1>
+    <a href="{{ url_for('colleges') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Colleges
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">College Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('add_college') }}">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">College Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="website" class="form-label">Website <span class="text-danger">*</span></label>
+                    <input type="url" class="form-control" id="website" name="website" placeholder="https://example.edu" required>
+                    <div class="form-text">Enter the full URL including http:// or https://</div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="type" class="form-label">College Type <span class="text-danger">*</span></label>
+                    <select class="form-select" id="type" name="type" required>
+                        <option value="">Select Type</option>
+                        {% for type in filter_options.types %}
+                        <option value="{{ type }}">{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="state" class="form-label">State <span class="text-danger">*</span></label>
+                    <select class="form-select" id="state" name="state" required>
+                        <option value="">Select State</option>
+                        {% for state in filter_options.states %}
+                        <option value="{{ state }}">{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" name="address">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="phone" name="phone">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email">
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12 text-end">
+                    <a href="{{ url_for('colleges') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Add College</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

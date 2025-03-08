@@ -1,0 +1,100 @@
+<!-- templates/explore/internship_year_data.html -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Overall Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% if internship.overall_statistics %}
+                <table class="table table-striped">
+                    <tbody>
+                        {% for key, value in internship.overall_statistics.items() %}
+                        <tr>
+                            <th>{{ key|replace('_', ' ')|title }}</th>
+                            <td>{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <div class="alert alert-info">No overall statistics available.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Department Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% if internship.department_statistics %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Department</th>
+                                <th>Participation</th>
+                                <th>Avg. Stipend</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dept in internship.department_statistics %}
+                            <tr>
+                                <td>{{ dept.department }}</td>
+                                <td>{{ dept.participation }}</td>
+                                <td>{{ dept.avg_stipend }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No department statistics available.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Internship Companies</h5>
+    </div>
+    <div class="card-body">
+        {% if internship.internship_companies %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Students Hired</th>
+                        <th>Stipend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for company in internship.internship_companies %}
+                    <tr>
+                        <td>{{ company.name }}</td>
+                        <td>{{ company.students_hired }}</td>
+                        <td>{{ company.stipend }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info">No internship companies information available.</div>
+        {% endif %}
+    </div>
+    <div class="card-footer bg-light text-muted">
+        <small>Academic Year: {{ internship.academic_year }}</small>
+        <small class="mx-3">Last updated: {{ internship.last_updated|format_date }}</small>
+        <small class="float-end">Source: 
+            {% for url in internship.source_urls %}
+            <a href="{{ url }}" target="_blank" class="text-muted">{{ url|truncate(50, true) }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </small>
+    </div>
+</div>

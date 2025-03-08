@@ -1,0 +1,64 @@
+<!-- templates/components/college_type_chart.html -->
+<div class="card shadow-sm h-100">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">College Type Distribution</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="collegeTypeChart" height="250"></canvas>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Get the canvas element
+        var ctx = document.getElementById('collegeTypeChart').getContext('2d');
+
+        // Data should be provided from the server
+        var collegeTypes = {{ college_types| tojson
+    }};
+
+    // Create the chart
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: Object.keys(collegeTypes),
+            datasets: [{
+                data: Object.values(collegeTypes),
+                backgroundColor: [
+                    '#4e73df',
+                    '#1cc88a',
+                    '#36b9cc',
+                    '#f6c23e',
+                    '#e74a3b'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'right',
+                    labels: {
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function (context) {
+                            var label = context.label || '';
+                            var value = context.formattedValue;
+                            var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            var percentage = Math.round((context.raw / total) * 100);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

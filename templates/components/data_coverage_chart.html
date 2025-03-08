@@ -1,0 +1,69 @@
+<div class="card shadow-sm h-100">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Data Coverage</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="dataCoverageChart" height="250"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the canvas element
+    var ctx = document.getElementById('dataCoverageChart').getContext('2d');
+    
+    // Data should be provided from the server
+    var coverageData = {{ data_coverage|tojson }};
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'radar',
+        data: {
+            labels: ['Admission', 'Placement', 'Internship', 'Raw Content', 'Processed'],
+            datasets: [{
+                label: 'Percentage of Colleges',
+                data: [
+                    coverageData.admission_percentage,
+                    coverageData.placement_percentage,
+                    coverageData.internship_percentage,
+                    coverageData.raw_content_percentage,
+                    coverageData.processed_percentage
+                ],
+                backgroundColor: 'rgba(78, 115, 223, 0.2)',
+                borderColor: '#4e73df',
+                pointBackgroundColor: '#4e73df',
+                pointBorderColor: '#fff',
+                pointHoverBackgroundColor: '#fff',
+                pointHoverBorderColor: '#4e73df',
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    angleLines: {
+                        display: true
+                    },
+                    suggestedMin: 0,
+                    suggestedMax: 100,
+                    ticks: {
+                        backdropColor: 'rgba(255, 255, 255, 0.75)',
+                        stepSize: 20
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.formattedValue}%`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

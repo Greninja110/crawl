@@ -1,0 +1,20 @@
+<!-- templates/errors/500.html -->
+{% extends "base.html" %}
+
+{% block title %}Server Error - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm text-center p-5 mt-5">
+            <h1 class="display-1 text-muted">500</h1>
+            <h2 class="mb-4">Server Error</h2>
+            <p class="mb-4">Something went wrong on our servers. We're aware of the issue and are working to fix it.</p>
+            <div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">Go to Dashboard</a>
+                <button onclick="location.reload()" class="btn btn-outline-secondary ms-2">Try Again</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

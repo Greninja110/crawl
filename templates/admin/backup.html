@@ -1,0 +1,102 @@
+<!-- templates/admin/backup.html -->
+{% extends "base.html" %}
+
+{% block title %}Database Backup - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Database Backup</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Create Backup</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin_backup') }}">
+                    <div class="mb-3">
+                        <label for="backup_dir" class="form-label">Backup Directory</label>
+                        <input type="text" class="form-control" id="backup_dir" name="backup_dir" value="backups">
+                        <div class="form-text">Directory where backup files will be stored. Will be created if it doesn't exist.</div>
+                    </div>
+                    
+                    <div class="alert alert-warning">
+                        <h6>Warning</h6>
+                        <p>Creating a backup may take some time depending on the database size. The application may become unresponsive during this process.</p>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Create Backup</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Database Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Collection</th>
+                                <th>Document Count</th>
+                                <th>Indexes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for collection, stats in db_stats.items() %}
+                            <tr>
+                                <td>{{ collection }}</td>
+                                <td>{{ stats.count }}</td>
+                                <td>{{ stats.indexes|length }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Backup Instructions</h5>
+    </div>
+    <div class="card-body">
+        <h6>Automated Backups</h6>
+        <p>For regular backups, consider setting up a cron job that calls the backup functionality at scheduled intervals.</p>
+        
+        <h6>Manual Backup</h6>
+        <p>The backup process will create the following files in the specified directory:</p>
+        <ul>
+            <li><code>colleges_[timestamp].json</code> - College data</li>
+            <li><code>raw_content_[timestamp].json</code> - Raw content data</li>
+            <li><code>admission_data_[timestamp].json</code> - Admission data</li>
+            <li><code>placement_data_[timestamp].json</code> - Placement data</li>
+            <li><code>internship_data_[timestamp].json</code> - Internship data</li>
+            <li><code>crawl_jobs_[timestamp].json</code> - Crawl job data</li>
+            <li><code>ai_processing_jobs_[timestamp].json</code> - AI processing job data</li>
+            <li><code>users_[timestamp].json</code> - User data</li>
+        </ul>
+        
+        <h6>Restore Instructions</h6>
+        <p>To restore from a backup:</p>
+        <ol>
+            <li>Ensure MongoDB is running</li>
+            <li>Use <code>mongoimport</code> to import each collection file</li>
+            <li>Example: <code>mongoimport --db college_data_crawler --collection colleges --file colleges_[timestamp].json</code></li>
+        </ol>
+        
+        <div class="alert alert-info mt-3">
+            <h6>Note</h6>
+            <p>For production environments, consider using MongoDB's built-in backup tools like <code>mongodump</code> and <code>mongorestore</code> for more robust backup solutions.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+<div class="card shadow-sm h-100">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Placement Trends</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="placementTrendsChart" height="250"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the canvas element
+    var ctx = document.getElementById('placementTrendsChart').getContext('2d');
+    
+    // Data should be provided from the server
+    var placementData = {{ placement_trends|tojson }};
+    
+    // Extract years and data
+    var years = placementData.map(item => item.year);
+    var avgPlacement = placementData.map(item => item.avg_placement_percentage);
+    var avgPackage = placementData.map(item => item.avg_package_lakhs);
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: years,
+            datasets: [
+                {
+                    label: 'Avg. Placement %',
+                    data: avgPlacement,
+                    borderColor: '#4e73df',
+                    backgroundColor: 'rgba(78, 115, 223, 0.05)',
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Avg. Package (Lakhs)',
+                    data: avgPackage,
+                    borderColor: '#1cc88a',
+                    backgroundColor: 'rgba(28, 200, 138, 0.05)',
+                    fill: true,
+                    tension: 0.3,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Placement Percentage'
+                    },
+                    max: 100
+                },
+                y1: {
+                    beginAtZero: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Package (Lakhs)'
+                    },
+                    grid: {
+                        drawOnChartArea: false
+                    }
+                }
+            },
+            plugins: {
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            }
+        }
+    });
+});
+</script>

@@ -1,0 +1,62 @@
+<div class="card shadow-sm h-100">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Top Recruiting Companies</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="topCompaniesChart" height="300"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the canvas element
+    var ctx = document.getElementById('topCompaniesChart').getContext('2d');
+    
+    // Data should be provided from the server
+    var companiesData = {{ top_companies|tojson }};
+    
+    // Sort data by count in descending order
+    companiesData.sort((a, b) => b.count - a.count);
+    
+    // Get top 10 companies
+    var topCompanies = companiesData.slice(0, 10);
+    
+    var companies = topCompanies.map(item => item.name);
+    var counts = topCompanies.map(item => item.count);
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'horizontalBar',
+        data: {
+            labels: companies,
+            datasets: [{
+                label: 'Number of Placements',
+                data: counts,
+                backgroundColor: [
+                    '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', '#e74a3b',
+                    '#6f42c1', '#20c9a6', '#4582ec', '#f7941e', '#e83e8c'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+});
+</script>

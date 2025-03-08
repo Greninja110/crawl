@@ -1,0 +1,121 @@
+<!-- templates/crawling/jobs.html -->
+{% extends "base.html" %}
+
+{% block title %}Crawl Jobs - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Crawl Jobs</h1>
+    <div>
+        <a href="{{ url_for('colleges') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Start New Crawl
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Filter Jobs</h5>
+    </div>
+    <div class="card-body">
+        <form method="GET" action="{{ url_for('crawl_jobs') }}" class="row g-3">
+            <div class="col-md-6">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="">All Statuses</option>
+                    <option value="queued" {% if status_filter == 'queued' %}selected{% endif %}>Queued</option>
+                    <option value="running" {% if status_filter == 'running' %}selected{% endif %}>Running</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Apply Filter</button>
+                <a href="{{ url_for('crawl_jobs') }}" class="btn btn-outline-secondary">Reset</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Crawl Jobs</h5>
+        <span class="badge bg-primary">{{ pagination.total }} Jobs</span>
+    </div>
+    <div class="card-body p-0">
+        {% if jobs %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>College</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Completed</th>
+                        <th>Duration</th>
+                        <th>Pages</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in jobs %}
+                    <tr>
+                        <td><a href="{{ url_for('crawl_job_details', job_id=job._id) }}">{{ job._id|truncate(10, true) }}</a></td>
+                        <td>
+                            {% if job.college %}
+                            <a href="{{ url_for('college_details', college_id=job.college._id) }}">{{ job.college.name }}</a>
+                            {% else %}
+                            <span class="text-muted">Unknown College</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if job.status == 'completed' %}success{% elif job.status == 'running' %}primary{% elif job.status == 'queued' %}warning{% else %}danger{% endif %}">
+                                {{ job.status }}
+                            </span>
+                        </td>
+                        <td>{{ job.timestamps.started|format_date if job.timestamps.started else 'Not started' }}</td>
+                        <td>{{ job.timestamps.completed|format_date if job.timestamps.completed else '-' }}</td>
+                        <td>{{ job.duration_seconds|format_duration if job.duration_seconds else '-' }}</td>
+                        <td>{{ job.pages_crawled }}</td>
+                        <td>
+                            <a href="{{ url_for('crawl_job_details', job_id=job._id) }}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info m-3">
+            No crawl jobs found matching your criteria.
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-footer bg-light">
+        <nav aria-label="Crawl jobs pagination">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('crawl_jobs', page=pagination.page-1, status=status_filter) }}">Previous</a>
+                </li>
+                
+                {% set start_page = [1, pagination.page - 2]|max %}
+                {% set end_page = [pagination.total_pages, start_page + 4]|min %}
+                {% set start_page = [1, end_page - 4]|max %}
+                
+                {% for page_num in range(start_page, end_page + 1) %}
+                <li class="page-item {% if pagination.page == page_num %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('crawl_jobs', page=page_num, status=status_filter) }}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+                
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('crawl_jobs', page=pagination.page+1, status=status_filter) }}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

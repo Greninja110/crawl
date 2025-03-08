@@ -1,0 +1,393 @@
+<!-- templates/crawling/job_details.html -->
+{% extends "base.html" %}
+
+{% block title %}Crawl Job Details - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Crawl Job Details</h1>
+    <div>
+        <a href="{{ url_for('crawl_jobs') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Back to Jobs
+        </a>
+        <a href="{{ url_for('college_details', college_id=job.college_id) }}" class="btn btn-primary">
+            <i class="bi bi-building"></i> View College
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Job Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <tr>
+                        <th style="width: 150px;">Job ID:</th>
+                        <td>{{ job._id }}</td>
+                    </tr>
+                    <tr>
+                        <th>College:</th>
+                        <td>
+                            {% if college %}
+                            <a href="{{ url_for('college_details', college_id=college._id) }}">{{ college.name }}</a>
+                            {% else %}
+                            <span class="text-muted">Unknown College</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Status:</th>
+                        <td>
+                            <span class="badge bg-{% if job.status == 'completed' %}success{% elif job.status == 'running' %}primary{% elif job.status == 'queued' %}warning{% else %}danger{% endif %}">
+                                {{ job.status }}
+                            </span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>Job Type:</th>
+                        <td>{{ job.job_type }}</td>
+                    </tr>
+                    <tr>
+                        <th>Created:</th>
+                        <td>{{ job.timestamps.created|format_date }}</td>
+                    </tr>
+                    <tr>
+                        <th>Started:</th>
+                        <td>{{ job.timestamps.started|format_date if job.timestamps.started else 'Not started' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Completed:</th>
+                        <td>{{ job.timestamps.completed|format_date if job.timestamps.completed else '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Duration:</th>
+                        <td>{{ job.duration_seconds|format_duration if job.duration_seconds else '-' }}</td>
+                    </tr>
+                    <tr>
+                        <th>Triggered By:</th>
+                        <td>
+                            {% if job.triggered_by == 'system' %}
+                            System
+                            {% elif job.triggered_by %}
+                            User (ID: {{ job.triggered_by }})
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Crawl Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% if job.status == 'running' %}
+                <div class="alert alert-primary">
+                    <h6>Crawl in progress</h6>
+                    <div class="progress mb-3">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ job.progress_percentage }}%" aria-valuenow="{{ job.progress_percentage }}" aria-valuemin="0" aria-valuemax="100">{{ job.progress_percentage }}%</div>
+                    </div>
+                    <p>Current URL: <small class="text-break">{{ job.current_url }}</small></p>
+                </div>
+                {% endif %}
+                
+                <div class="row text-center">
+                    <div class="col-6 mb-4">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <h3 class="mb-0">{{ job.pages_crawled }}</h3>
+                                <small class="text-muted">Pages Crawled</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-6 mb-4">
+                        <div class="card bg-light">
+                            <div class="card-body py-3">
+                                <h3 class="mb-0">{{ job.pages_processed }}</h3>
+                                <small class="text-muted">Pages Processed</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h6 class="mt-2">Content Categories</h6>
+                <div class="row text-center">
+                    <div class="col-3">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body py-2">
+                                <h5 class="mb-0">{{ job.crawling_stats.admission_pages or 0 }}</h5>
+                                <small class="text-muted">Admission</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body py-2">
+                                <h5 class="mb-0">{{ job.crawling_stats.placement_pages or 0 }}</h5>
+                                <small class="text-muted">Placement</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body py-2">
+                                <h5 class="mb-0">{{ job.crawling_stats.internship_pages or 0 }}</h5>
+                                <small class="text-muted">Internship</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-3">
+                        <div class="card bg-light mb-3">
+                            <div class="card-body py-2">
+                                <h5 class="mb-0">{{ job.crawling_stats.other_pages or 0 }}</h5>
+                                <small class="text-muted">Other</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {% if job.errors %}
+                <h6 class="mt-4 text-danger">Errors</h6>
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        {% for error in job.errors %}
+                        <li>
+                            {{ error.message }}
+                            <small class="d-block text-muted">{{ error.timestamp|format_date }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Extracted Content</h5>
+        <span class="badge bg-primary">{{ content_by_type.admission|length + content_by_type.placement|length + content_by_type.internship|length + content_by_type.general|length }} Pages</span>
+    </div>
+    <div class="card-body">
+        <ul class="nav nav-tabs mb-3" id="contentTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="admission-tab" data-bs-toggle="tab" data-bs-target="#admission" type="button" role="tab">
+                    Admission <span class="badge bg-secondary">{{ content_by_type.admission|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="placement-tab" data-bs-toggle="tab" data-bs-target="#placement" type="button" role="tab">
+                    Placement <span class="badge bg-secondary">{{ content_by_type.placement|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="internship-tab" data-bs-toggle="tab" data-bs-target="#internship" type="button" role="tab">
+                    Internship <span class="badge bg-secondary">{{ content_by_type.internship|length }}</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="general-tab" data-bs-toggle="tab" data-bs-target="#general" type="button" role="tab">
+                    General <span class="badge bg-secondary">{{ content_by_type.general|length }}</span>
+                </button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="contentTabsContent">
+            <!-- Admission Tab -->
+            <div class="tab-pane fade show active" id="admission" role="tabpanel" aria-labelledby="admission-tab">
+                {% if content_by_type.admission %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Extraction Date</th>
+                                <th>Processed</th>
+                                <th>Processing Attempts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for content in content_by_type.admission %}
+                            <tr>
+                                <td>
+                                    <a href="{{ content.url }}" target="_blank" class="text-truncate d-inline-block" style="max-width: 400px;">
+                                        {{ content.url }}
+                                    </a>
+                                </td>
+                                <td>{{ content.extraction_date|format_date }}</td>
+                                <td>
+                                    <span class="badge bg-{% if content.processed %}success{% else %}warning{% endif %}">
+                                        {{ 'Yes' if content.processed else 'No' }}
+                                    </span>
+                                </td>
+                                <td>{{ content.processing_attempts }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No admission content extracted.</div>
+                {% endif %}
+            </div>
+            
+            <!-- Placement Tab -->
+            <div class="tab-pane fade" id="placement" role="tabpanel" aria-labelledby="placement-tab">
+                {% if content_by_type.placement %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Extraction Date</th>
+                                <th>Processed</th>
+                                <th>Processing Attempts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for content in content_by_type.placement %}
+                            <tr>
+                                <td>
+                                    <a href="{{ content.url }}" target="_blank" class="text-truncate d-inline-block" style="max-width: 400px;">
+                                        {{ content.url }}
+                                    </a>
+                                </td>
+                                <td>{{ content.extraction_date|format_date }}</td>
+                                <td>
+                                    <span class="badge bg-{% if content.processed %}success{% else %}warning{% endif %}">
+                                        {{ 'Yes' if content.processed else 'No' }}
+                                    </span>
+                                </td>
+                                <td>{{ content.processing_attempts }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No placement content extracted.</div>
+                {% endif %}
+            </div>
+            
+            <!-- Internship Tab -->
+            <div class="tab-pane fade" id="internship" role="tabpanel" aria-labelledby="internship-tab">
+                {% if content_by_type.internship %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Extraction Date</th>
+                                <th>Processed</th>
+                                <th>Processing Attempts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for content in content_by_type.internship %}
+                            <tr>
+                                <td>
+                                    <a href="{{ content.url }}" target="_blank" class="text-truncate d-inline-block" style="max-width: 400px;">
+                                        {{ content.url }}
+                                    </a>
+                                </td>
+                                <td>{{ content.extraction_date|format_date }}</td>
+                                <td>
+                                    <span class="badge bg-{% if content.processed %}success{% else %}warning{% endif %}">
+                                        {{ 'Yes' if content.processed else 'No' }}
+                                    </span>
+                                </td>
+                                <td>{{ content.processing_attempts }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No internship content extracted.</div>
+                {% endif %}
+            </div>
+            
+            <!-- General Tab -->
+            <div class="tab-pane fade" id="general" role="tabpanel" aria-labelledby="general-tab">
+                {% if content_by_type.general %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>URL</th>
+                                <th>Extraction Date</th>
+                                <th>Processed</th>
+                                <th>Processing Attempts</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for content in content_by_type.general %}
+                            <tr>
+                                <td>
+                                    <a href="{{ content.url }}" target="_blank" class="text-truncate d-inline-block" style="max-width: 400px;">
+                                        {{ content.url }}
+                                    </a>
+                                </td>
+                                <td>{{ content.extraction_date|format_date }}</td>
+                                <td>
+                                    <span class="badge bg-{% if content.processed %}success{% else %}warning{% endif %}">
+                                        {{ 'Yes' if content.processed else 'No' }}
+                                    </span>
+                                </td>
+                                <td>{{ content.processing_attempts }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No general content extracted.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        {% if job.status == 'running' %}
+        // Poll for job status updates
+        function updateJobStatus() {
+            $.get('{{ url_for("crawl_status_route", job_id=job._id) }}', function(data) {
+                if (data.status === 'running' && data.progress) {
+                    // Update progress bar
+                    $('.progress-bar').css('width', data.progress.progress_percentage + '%')
+                        .attr('aria-valuenow', data.progress.progress_percentage)
+                        .text(data.progress.progress_percentage + '%');
+                    
+                    // Update current URL
+                    $('p:contains("Current URL")').html('Current URL: <small class="text-break">' + data.progress.current_url + '</small>');
+                    
+                    // Continue polling
+                    setTimeout(updateJobStatus, 5000);
+                } else if (data.status !== 'running') {
+                    // Reload page if job completed or failed
+                    window.location.reload();
+                } else {
+                    // Continue polling
+                    setTimeout(updateJobStatus, 5000);
+                }
+            });
+        }
+        
+        // Start polling
+        setTimeout(updateJobStatus, 5000);
+        {% endif %}
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+<div class="card shadow-sm h-100">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">College Distribution by State</h5>
+    </div>
+    <div class="card-body">
+        <canvas id="stateDistributionChart" height="300"></canvas>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the canvas element
+    var ctx = document.getElementById('stateDistributionChart').getContext('2d');
+    
+    // Data should be provided from the server
+    var stateData = {{ state_distribution|tojson }};
+    
+    // Sort data by count in descending order
+    var sortedStates = Object.entries(stateData)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10); // Get top 10 states
+    
+    var states = sortedStates.map(item => item[0]);
+    var counts = sortedStates.map(item => item[1]);
+    
+    // Create the chart
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: states,
+            datasets: [{
+                label: 'Number of Colleges',
+                data: counts,
+                backgroundColor: '#4e73df',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                title: {
+                    display: true,
+                    text: 'Top 10 States by Number of Colleges',
+                    font: {
+                        size: 14
+                    }
+                }
+            }
+        }
+    });
+});
+</script>

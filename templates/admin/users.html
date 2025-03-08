@@ -1,0 +1,391 @@
+<!-- templates/admin/users.html -->
+{% extends "base.html" %}
+
+{% block title %}User Management - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>User Management</h1>
+    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addUserModal">
+        <i class="bi bi-person-plus"></i> Add User
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+        <h5 class="mb-0">Users</h5>
+        <span class="badge bg-primary">{{ pagination.total }} Users</span>
+    </div>
+    <div class="card-body p-0">
+        {% if users %}
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Last Login</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.email }}</td>
+                        <td>{{ user.name }}</td>
+                        <td>
+                            <span class="badge bg-{% if user.role == 'admin' %}danger{% else %}info{% endif %}">
+                                {{ user.role }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-{% if user.active %}success{% else %}secondary{% endif %}">
+                                {{ 'Active' if user.active else 'Inactive' }}
+                            </span>
+                        </td>
+                        <td>{{ user.last_login|format_date if user.last_login else 'Never' }}</td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-primary edit-user-btn" 
+                                    data-user-id="{{ user.id }}"
+                                    data-username="{{ user.username }}"
+                                    data-email="{{ user.email }}"
+                                    data-name="{{ user.name }}"
+                                    data-role="{{ user.role }}"
+                                    data-active="{{ user.active }}">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                
+                                <!-- Role Change Button -->
+                                <button type="button" class="btn btn-outline-secondary change-role-btn"
+                                    data-user-id="{{ user.id }}"
+                                    data-username="{{ user.username }}"
+                                    data-role="{{ user.role }}">
+                                    <i class="bi bi-person-badge"></i>
+                                </button>
+                                
+                                <!-- Toggle Status Button -->
+                                <button type="button" class="btn btn-outline-{% if user.active %}warning{% else %}success{% endif %} toggle-status-btn"
+                                    data-user-id="{{ user.id }}"
+                                    data-username="{{ user.username }}"
+                                    data-active="{{ user.active }}">
+                                    <i class="bi bi-{% if user.active %}person-dash{% else %}person-check{% endif %}"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="alert alert-info m-3">
+            No users found.
+        </div>
+        {% endif %}
+    </div>
+    <div class="card-footer bg-light">
+        <nav aria-label="Users pagination">
+            <ul class="pagination justify-content-center mb-0">
+                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_users', page=pagination.page-1) }}">Previous</a>
+                </li>
+                
+                {% set start_page = [1, pagination.page - 2]|max %}
+                {% set end_page = [pagination.total_pages, start_page + 4]|min %}
+                {% set start_page = [1, end_page - 4]|max %}
+                
+                {% for page_num in range(start_page, end_page + 1) %}
+                <li class="page-item {% if pagination.page == page_num %}active{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_users', page=page_num) }}">{{ page_num }}</a>
+                </li>
+                {% endfor %}
+                
+                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('admin_users', page=pagination.page+1) }}">Next</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addUserForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="name" name="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="active" name="active" checked>
+                        <label class="form-check-label" for="active">Active</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="addUserBtn">Add User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="edit_user_id" name="user_id">
+                    <div class="mb-3">
+                        <label for="edit_username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="edit_username" name="username" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="edit_email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_name" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="edit_name" name="name">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_password" class="form-label">Password (leave empty to keep current)</label>
+                        <input type="password" class="form-control" id="edit_password" name="password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_role" class="form-label">Role</label>
+                        <select class="form-select" id="edit_role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="edit_active" name="active">
+                        <label class="form-check-label" for="edit_active">Active</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="updateUserBtn">Update User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Change Role Modal -->
+<div class="modal fade" id="changeRoleModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change Role</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Change role for user: <strong id="roleUsername"></strong></p>
+                <form id="changeRoleForm">
+                    <input type="hidden" id="role_user_id" name="user_id">
+                    <div class="mb-3">
+                        <label for="new_role" class="form-label">New Role</label>
+                        <select class="form-select" id="new_role" name="role" required>
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="changeRoleBtn">Change Role</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Toggle Status Modal -->
+<div class="modal fade" id="toggleStatusModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="toggleStatusTitle">Activate/Deactivate User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="toggleStatusText">Are you sure you want to activate/deactivate this user?</p>
+                <form id="toggleStatusForm">
+                    <input type="hidden" id="status_user_id" name="user_id">
+                    <input type="hidden" id="new_status" name="active">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="toggleStatusBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Edit User
+        $('.edit-user-btn').click(function() {
+            var userId = $(this).data('user-id');
+            var username = $(this).data('username');
+            var email = $(this).data('email');
+            var name = $(this).data('name');
+            var role = $(this).data('role');
+            var active = $(this).data('active');
+            
+            $('#edit_user_id').val(userId);
+            $('#edit_username').val(username);
+            $('#edit_email').val(email);
+            $('#edit_name').val(name);
+            $('#edit_role').val(role);
+            $('#edit_active').prop('checked', active === true || active === 'true');
+            
+            $('#editUserModal').modal('show');
+        });
+        
+        // Update User
+        $('#updateUserBtn').click(function() {
+            // Submit form via AJAX
+            alert('Update functionality would be implemented here');
+            $('#editUserModal').modal('hide');
+        });
+        
+        // Add User
+        $('#addUserBtn').click(function() {
+            // Submit form via AJAX
+            alert('Add user functionality would be implemented here');
+            $('#addUserModal').modal('hide');
+        });
+        
+        // Change Role
+        $('.change-role-btn').click(function() {
+            var userId = $(this).data('user-id');
+            var username = $(this).data('username');
+            var role = $(this).data('role');
+            
+            $('#role_user_id').val(userId);
+            $('#roleUsername').text(username);
+            $('#new_role').val(role);
+            
+            $('#changeRoleModal').modal('show');
+        });
+        
+        // Submit Change Role
+        $('#changeRoleBtn').click(function() {
+            var userId = $('#role_user_id').val();
+            var newRole = $('#new_role').val();
+            
+            // Disable button and show loading state
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Changing...');
+            
+            // Make AJAX request
+            $.post(`{{ url_for('change_user_role', user_id='XXX') }}`.replace('XXX', userId), {
+                role: newRole
+            })
+            .done(function(data) {
+                if (data.status === 'success') {
+                    alert('Role changed successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                    $('#changeRoleBtn').prop('disabled', false).text('Change Role');
+                }
+            })
+            .fail(function() {
+                alert('Failed to change role. Please try again.');
+                $('#changeRoleBtn').prop('disabled', false).text('Change Role');
+            });
+        });
+        
+        // Toggle Status
+        $('.toggle-status-btn').click(function() {
+            var userId = $(this).data('user-id');
+            var username = $(this).data('username');
+            var currentActive = $(this).data('active');
+            var newActive = !(currentActive === true || currentActive === 'true');
+            
+            $('#status_user_id').val(userId);
+            $('#new_status').val(newActive);
+            
+            if (newActive) {
+                $('#toggleStatusTitle').text('Activate User');
+                $('#toggleStatusText').text(`Are you sure you want to activate user "${username}"?`);
+                $('#toggleStatusBtn').removeClass('btn-danger').addClass('btn-success').text('Activate');
+            } else {
+                $('#toggleStatusTitle').text('Deactivate User');
+                $('#toggleStatusText').text(`Are you sure you want to deactivate user "${username}"?`);
+                $('#toggleStatusBtn').removeClass('btn-success').addClass('btn-danger').text('Deactivate');
+            }
+            
+            $('#toggleStatusModal').modal('show');
+        });
+        
+        // Submit Toggle Status
+        $('#toggleStatusBtn').click(function() {
+            var userId = $('#status_user_id').val();
+            var active = $('#new_status').val();
+            
+            // Disable button and show loading state
+            $(this).prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...');
+            
+            // Make AJAX request
+            $.post(`{{ url_for('toggle_user_status', user_id='XXX') }}`.replace('XXX', userId), {
+                active: active
+            })
+            .done(function(data) {
+                if (data.status === 'success') {
+                    alert('User status updated successfully!');
+                    window.location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                    $('#toggleStatusBtn').prop('disabled', false).text('Confirm');
+                }
+            })
+            .fail(function() {
+                alert('Failed to update user status. Please try again.');
+                $('#toggleStatusBtn').prop('disabled', false).text('Confirm');
+            });
+        });
+    });
+</script>
+{% endblock %}

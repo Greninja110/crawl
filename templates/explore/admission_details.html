@@ -1,0 +1,203 @@
+<!-- templates/explore/admission_details.html -->
+{% extends "base.html" %}
+
+{% block title %}{{ college.name }} Admission Data - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>{{ college.name }} Admission Data</h1>
+    <div>
+        <a href="{{ url_for('explore_admission') }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Back to Admission Data
+        </a>
+        <a href="{{ url_for('college_details', college_id=college._id) }}" class="btn btn-primary">
+            <i class="bi bi-building"></i> View College
+        </a>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Available Courses</h5>
+            </div>
+            <div class="card-body">
+                {% if admission_data.courses %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Course Name</th>
+                                <th>Duration</th>
+                                <th>Seats</th>
+                                <th>Eligibility</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for course in admission_data.courses %}
+                            <tr>
+                                <td>{{ course.name }}</td>
+                                <td>{{ course.duration }}</td>
+                                <td>{{ course.seats }}</td>
+                                <td>{{ course.eligibility }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No course information available.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Fee Structure</h5>
+            </div>
+            <div class="card-body">
+                {% set has_fees = false %}
+                {% for course in admission_data.courses %}
+                    {% if course.fee_structure %}
+                        {% set has_fees = true %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if has_fees %}
+                <div class="accordion" id="feeAccordion">
+                    {% for course in admission_data.courses %}
+                        {% if course.fee_structure %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="heading{{ loop.index }}">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}">
+                                    {{ course.name }}
+                                </button>
+                            </h2>
+                            <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" data-bs-parent="#feeAccordion">
+                                <div class="accordion-body">
+                                    <table class="table table-sm">
+                                        {% for fee_type, fee_amount in course.fee_structure.items() %}
+                                        <tr>
+                                            <th>{{ fee_type|title }}</th>
+                                            <td>{{ fee_amount }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info">No fee structure information available.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Application Process</h5>
+            </div>
+            <div class="card-body">
+                {% if admission_data.application_process %}
+                <p>{{ admission_data.application_process }}</p>
+                {% else %}
+                <div class="alert alert-info">No application process information available.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Important Dates</h5>
+            </div>
+            <div class="card-body">
+                {% if admission_data.important_dates %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Event</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for date in admission_data.important_dates %}
+                            <tr>
+                                <td>{{ date.event }}</td>
+                                <td>{{ date.date }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">No important dates information available.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Hostel Facilities</h5>
+    </div>
+    <div class="card-body">
+        {% if admission_data.hostel_facilities %}
+        <p>
+            Hostel Available: 
+            <span class="badge bg-{% if admission_data.hostel_facilities.available %}success{% else %}secondary{% endif %}">
+                {{ 'Yes' if admission_data.hostel_facilities.available else 'No' }}
+            </span>
+        </p>
+        
+        {% if admission_data.hostel_facilities.available %}
+        <div class="row">
+            {% if admission_data.hostel_facilities.boys_hostel %}
+            <div class="col-md-6">
+                <div class="card bg-light mb-3">
+                    <div class="card-header">Boys Hostel</div>
+                    <div class="card-body">
+                        <p class="mb-1">Fee: {{ admission_data.hostel_facilities.boys_hostel.fee }}</p>
+                        <p class="mb-0">Seats: {{ admission_data.hostel_facilities.boys_hostel.seats }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if admission_data.hostel_facilities.girls_hostel %}
+            <div class="col-md-6">
+                <div class="card bg-light mb-3">
+                    <div class="card-header">Girls Hostel</div>
+                    <div class="card-body">
+                        <p class="mb-1">Fee: {{ admission_data.hostel_facilities.girls_hostel.fee }}</p>
+                        <p class="mb-0">Seats: {{ admission_data.hostel_facilities.girls_hostel.seats }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endif %}
+        {% else %}
+        <div class="alert alert-info">No hostel facilities information available.</div>
+        {% endif %}
+    </div>
+    <div class="card-footer bg-light text-muted">
+        <small>Last updated: {{ admission_data.last_updated|format_date }}</small>
+        <small class="float-end">Source: 
+            {% for url in admission_data.source_urls %}
+            <a href="{{ url }}" target="_blank" class="text-muted">{{ url|truncate(50, true) }}</a>{% if not loop.last %}, {% endif %}
+            {% endfor %}
+        </small>
+    </div>
+</div>
+{% endblock %}

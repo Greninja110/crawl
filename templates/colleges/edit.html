@@ -1,0 +1,155 @@
+<!-- templates/colleges/edit.html -->
+{% extends "base.html" %}
+
+{% block title %}Edit College - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Edit College</h1>
+    <div>
+        <a href="{{ url_for('college_details', college_id=college._id) }}" class="btn btn-outline-secondary me-2">
+            <i class="bi bi-arrow-left"></i> Back to Details
+        </a>
+        {% if current_user.has_permission('delete_college') %}
+        <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteCollegeModal">
+            <i class="bi bi-trash"></i> Delete College
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">College Information</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('edit_college', college_id=college._id) }}" id="collegeForm">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">College Name <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="name" name="name" value="{{ college.name }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="website" class="form-label">Website <span class="text-danger">*</span></label>
+                    <input type="url" class="form-control" id="website" name="website" value="{{ college.website }}" placeholder="https://example.edu" required data-validate-url>
+                    <div class="form-text">Enter the full URL including http:// or https://</div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="type" class="form-label">College Type <span class="text-danger">*</span></label>
+                    <select class="form-select" id="type" name="type" required>
+                        <option value="">Select Type</option>
+                        {% for type in filter_options.types %}
+                        <option value="{{ type }}" {% if college.type == type %}selected{% endif %}>{{ type }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="state" class="form-label">State <span class="text-danger">*</span></label>
+                    <select class="form-select" id="state" name="state" required>
+                        <option value="">Select State</option>
+                        {% for state in filter_options.states %}
+                        <option value="{{ state }}" {% if college.state == state %}selected{% endif %}>{{ state }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="city" class="form-label">City</label>
+                    <input type="text" class="form-control" id="city" name="city" value="{{ college.location.city if college.location and college.location.city else '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="address" class="form-label">Address</label>
+                    <input type="text" class="form-control" id="address" name="address" value="{{ college.location.address if college.location and college.location.address else '' }}">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="text" class="form-control" id="phone" name="phone" value="{{ college.contact_info.phone if college.contact_info and college.contact_info.phone else '' }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" name="email" value="{{ college.contact_info.email if college.contact_info and college.contact_info.email else '' }}">
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="established_year" class="form-label">Established Year</label>
+                    <input type="number" class="form-control" id="established_year" name="established_year" value="{{ college.established_year }}" min="1800" max="{{ now.year }}">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="active" {% if college.status == 'active' %}selected{% endif %}>Active</option>
+                        <option value="inactive" {% if college.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="affiliations" class="form-label">Affiliations</label>
+                    <input type="text" class="form-control" id="affiliations" name="affiliations" value="{{ college.affiliations|join(', ') if college.affiliations else '' }}">
+                    <div class="form-text">Enter affiliations separated by commas</div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label for="accreditations" class="form-label">Accreditations</label>
+                    <input type="text" class="form-control" id="accreditations" name="accreditations" value="{{ college.accreditations|join(', ') if college.accreditations else '' }}">
+                    <div class="form-text">Enter accreditations separated by commas</div>
+                </div>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-12 text-end">
+                    <a href="{{ url_for('college_details', college_id=college._id) }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update College</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete College Modal -->
+<div class="modal fade" id="deleteCollegeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete College</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <strong>{{ college.name }}</strong>?</p>
+                <p class="text-danger">This will permanently remove the college and all associated data, including crawl history, admission data, placement data, and internship data.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="POST" action="{{ url_for('delete_college', college_id=college._id) }}">
+                    <button type="submit" class="btn btn-danger">Delete College</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/form-validation.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Initialize form validation
+        FormValidator.init('collegeForm', {
+            showValidFeedback: false
+        });
+    });
+</script>
+{% endblock %}

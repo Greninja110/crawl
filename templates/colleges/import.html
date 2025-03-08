@@ -1,0 +1,67 @@
+<!-- templates/colleges/import.html -->
+{% extends "base.html" %}
+
+{% block title %}Import Colleges - College Data Crawler{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Import Colleges</h1>
+    <a href="{{ url_for('colleges') }}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Colleges
+    </a>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light">
+        <h5 class="mb-0">Upload File</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('import_colleges') }}" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">Select File <span class="text-danger">*</span></label>
+                <input type="file" class="form-control" id="file" name="file" required>
+                <div class="form-text">Supported formats: JSON, CSV</div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="type" class="form-label">Default College Type</label>
+                <select class="form-select" id="type" name="type">
+                    <option value="">No default type</option>
+                    {% for type in filter_options.types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                    {% endfor %}
+                </select>
+                <div class="form-text">This will be used if the college type is not specified in the file</div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header">File Format Requirements</div>
+                <div class="card-body">
+                    <h6>JSON Format</h6>
+                    <pre class="bg-light p-3 mb-3"><code>[
+  {
+    "name": "Example College",
+    "website": "https://example.edu",
+    "type": "Engineering",
+    "state": "Maharashtra"
+  },
+  ...
+]</code></pre>
+                    
+                    <h6>CSV Format</h6>
+                    <pre class="bg-light p-3"><code>name,website,type,state
+Example College,https://example.edu,Engineering,Maharashtra
+...</code></pre>
+                    
+                    <p class="mb-0 mt-3"><strong>Required fields:</strong> name, website</p>
+                </div>
+            </div>
+            
+            <div class="text-end">
+                <a href="{{ url_for('colleges') }}" class="btn btn-outline-secondary me-2">Cancel</a>
+                <button type="submit" class="btn btn-primary">Import Colleges</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
