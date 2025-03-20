@@ -21,6 +21,7 @@ from services.crawler_service import start_college_crawl, get_crawl_status, get_
 from services.ai_service import get_model_status, load_ai_model, unload_ai_model
 from workers import crawler_worker, ai_worker
 from config import get_config
+import logging
 
 # Initialize Flask app
 app = Flask(__name__)
@@ -60,9 +61,10 @@ app.json_encoder = MongoJSONEncoder
 # Initialize workers
 # Initialize workers function
 def init_workers():
+    logging.info("Starting crawler workers...")
     # Initialize crawler workers
     crawler_worker.init_workers()
-    
+    logging.info("Crawler workers initialized")
     # Initialize AI workers
     ai_worker.init_workers()
     
@@ -500,20 +502,26 @@ def start_crawl(college_id):
     if not current_user.has_permission('start_crawl'):
         return jsonify({'status': 'error', 'message': 'You do not have permission to start crawls.'})
     
+    logging.info(f"Received request to start crawl for college_id: {college_id}")
+    
     # Check if there's already an active crawl job
     from models.crawl_job import get_active_crawl_job_for_college
     active_job = get_active_crawl_job_for_college(db, college_id)
     
     if active_job:
+        logging.warning(f"Crawl already in progress for college {college_id}, job ID: {active_job['_id']}")
         return jsonify({
             'status': 'error',
             'message': f'A crawl job is already in progress for this college. Job ID: {active_job["_id"]}'
         })
     
     # Start crawl job
+    logging.info(f"Creating new crawl job for college {college_id}")
     job_id, message = start_college_crawl(college_id, current_user.id)
+    logging.info(f"Crawl job created with ID: {job_id}")
     
     # Enqueue job for processing
+    logging.info(f"Enqueueing job {job_id} for processing")
     crawler_worker.enqueue_job(job_id, college_id)
     
     return jsonify({

@@ -28,7 +28,7 @@ class Config:
     
     # AI model configuration
     AI_MODEL_PATH = os.getenv('AI_MODEL_PATH', None)
-    AI_MODEL_NAME = os.getenv('AI_MODEL_NAME', 'microsoft/phi-2')
+    AI_MODEL_NAME = os.getenv('AI_MODEL_NAME', 'TinyLlama/TinyLlama-1.1B-Chat-v1.0')
     AI_MODEL_DEVICE = os.getenv('AI_MODEL_DEVICE', 'cpu')
     
     # Crawler configuration

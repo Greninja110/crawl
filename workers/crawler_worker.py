@@ -107,6 +107,8 @@ def poll_for_jobs():
     Poll the database for new crawl jobs
     """
     try:
+        logger.info("Polling for new crawl jobs...")
+        
         # Always get a fresh database connection for polling
         db = init_db()  # Use init_db instead of get_db to ensure a fresh connection
         
@@ -123,15 +125,19 @@ def poll_for_jobs():
                 for job in queued_jobs:
                     # Skip if already in queue or active
                     if str(job['_id']) in active_jobs:
+                        logger.info(f"Job {job['_id']} already in active jobs, skipping")
                         continue
                     
                     # Add to queue
+                    logger.info(f"Adding job {job['_id']} to queue for college {job['college_id']}")
                     job_queue.put({
                         'job_id': job['_id'],
                         'college_id': job['college_id']
                     })
                     
                     logger.info(f"Added job {job['_id']} to queue for college {job['college_id']}")
+            else:
+                logger.debug("No queued jobs found")
         except Exception as query_error:
             logger.error(f"Error querying for jobs: {str(query_error)}")
             # Don't re-raise to keep the worker running
